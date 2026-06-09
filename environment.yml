@@ -1,4 +1,4 @@
-name: entorno_virtual_depresivo
+name: entorno_ciencia_de_datos
 channels:
   - defaults
 dependencies:
