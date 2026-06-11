@@ -8,6 +8,14 @@ import numpy as np
 app = dash.Dash(__name__, title="Dashboard Depresión Estudiantil - Interactivo")
 server = app.server
 
+# Paleta de colores para gráficos
+COLORS = {
+    'no_depression': '#667eea',
+    'yes_depression': '#f56565',
+    'scatter': ['#48bb78', '#ed8936'],
+    'table_header': '#667eea'
+}
+
 # Cargar datos
 df = pd.read_csv('data/processed/Student_Depression_Dataset_Limpio.csv')
 
@@ -18,192 +26,182 @@ degree_options = [{'label': d, 'value': d} for d in df['Degree'].unique()]
 sleep_options = [{'label': s, 'value': s} for s in df['Sleep Duration'].unique()]
 
 # Layout del dashboard
-app.layout = html.Div([
-    html.Div([
-        html.H1("📊 Dashboard de Depresión en Estudiantes - Interactivo", 
-                style={'textAlign': 'center', 'color': '#2c3e50', 'marginBottom': 30, 'paddingTop': 20})
-    ], style={'backgroundColor': '#f8f9fa', 'paddingBottom': 20}),
+app.layout = html.Div(className='dashboard-container', children=[
+    html.Div(className='header', children=[
+        html.H1("📊 Dashboard de Depresión en Estudiantes - Interactivo")
+    ]),
 
     # Sección de filtros
-    html.Div([
-        html.Div([
-            html.H3("🔍 Filtros", style={'color': '#2c3e50', 'marginBottom': 15}),
+    html.Div(className='filters-section', children=[
+        html.H3("🔍 Filtros"),
+        
+        # Fila 1: Género, Ciudad, Carrera
+        html.Div(className='filter-row', children=[
+            html.Div(className='filter-item', children=[
+                html.Label("Género:"),
+                dcc.Dropdown(
+                    id='gender-filter',
+                    options=gender_options,
+                    value=[],
+                    multi=True,
+                    placeholder="Selecciona género(s)"
+                )
+            ]),
             
-            # Fila 1: Género, Ciudad, Carrera
-            html.Div([
-                html.Div([
-                    html.Label("Género:", style={'fontWeight': 'bold'}),
-                    dcc.Dropdown(
-                        id='gender-filter',
-                        options=gender_options,
-                        value=[],
-                        multi=True,
-                        placeholder="Selecciona género(s)"
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-                
-                html.Div([
-                    html.Label("Ciudad:", style={'fontWeight': 'bold'}),
-                    dcc.Dropdown(
-                        id='city-filter',
-                        options=city_options,
-                        value=[],
-                        multi=True,
-                        placeholder="Selecciona ciudad(es)"
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-                
-                html.Div([
-                    html.Label("Carrera:", style={'fontWeight': 'bold'}),
-                    dcc.Dropdown(
-                        id='degree-filter',
-                        options=degree_options,
-                        value=[],
-                        multi=True,
-                        placeholder="Selecciona carrera(s)"
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-            ], style={'display': 'flex', 'marginBottom': 20}),
+            html.Div(className='filter-item', children=[
+                html.Label("Ciudad:"),
+                dcc.Dropdown(
+                    id='city-filter',
+                    options=city_options,
+                    value=[],
+                    multi=True,
+                    placeholder="Selecciona ciudad(es)"
+                )
+            ]),
             
-            # Fila 2: Sliders de edad, presión académica, CGPA
-            html.Div([
-                html.Div([
-                    html.Label("Rango de Edad:", style={'fontWeight': 'bold'}),
-                    dcc.RangeSlider(
-                        id='age-slider',
-                        min=df['Age'].min(),
-                        max=df['Age'].max(),
-                        value=[df['Age'].min(), df['Age'].max()],
-                        marks={int(age): str(int(age)) for age in np.linspace(df['Age'].min(), df['Age'].max(), 5)},
-                        step=1
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-                
-                html.Div([
-                    html.Label("Presión Académica:", style={'fontWeight': 'bold'}),
-                    dcc.RangeSlider(
-                        id='pressure-slider',
-                        min=df['Academic Pressure'].min(),
-                        max=df['Academic Pressure'].max(),
-                        value=[df['Academic Pressure'].min(), df['Academic Pressure'].max()],
-                        marks={int(p): str(int(p)) for p in range(int(df['Academic Pressure'].min()), int(df['Academic Pressure'].max())+1)},
-                        step=0.5
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-                
-                html.Div([
-                    html.Label("CGPA:", style={'fontWeight': 'bold'}),
-                    dcc.RangeSlider(
-                        id='cgpa-slider',
-                        min=df['CGPA'].min(),
-                        max=df['CGPA'].max(),
-                        value=[df['CGPA'].min(), df['CGPA'].max()],
-                        marks={round(cgpa, 1): str(round(cgpa, 1)) for cgpa in np.linspace(df['CGPA'].min(), df['CGPA'].max(), 5)},
-                        step=0.1
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-            ], style={'display': 'flex', 'marginBottom': 20}),
+            html.Div(className='filter-item', children=[
+                html.Label("Carrera:"),
+                dcc.Dropdown(
+                    id='degree-filter',
+                    options=degree_options,
+                    value=[],
+                    multi=True,
+                    placeholder="Selecciona carrera(s)"
+                )
+            ]),
+        ]),
+        
+        # Fila 2: Sliders de edad, presión académica, CGPA
+        html.Div(className='filter-row', children=[
+            html.Div(className='filter-item', children=[
+                html.Label("Rango de Edad:"),
+                dcc.RangeSlider(
+                    id='age-slider',
+                    min=df['Age'].min(),
+                    max=df['Age'].max(),
+                    value=[df['Age'].min(), df['Age'].max()],
+                    marks={int(age): str(int(age)) for age in np.linspace(df['Age'].min(), df['Age'].max(), 5)},
+                    step=1
+                )
+            ]),
             
-            # Fila 3: Checkboxes de sueño y radio buttons de depresión
-            html.Div([
-                html.Div([
-                    html.Label("Duración del Sueño:", style={'fontWeight': 'bold'}),
-                    dcc.Checklist(
-                        id='sleep-checklist',
-                        options=sleep_options,
-                        value=df['Sleep Duration'].unique().tolist(),
-                        inline=True
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-                
-                html.Div([
-                    html.Label("Estado de Depresión:", style={'fontWeight': 'bold'}),
-                    dcc.RadioItems(
-                        id='depression-radio',
-                        options=[
-                            {'label': 'Todos', 'value': 'all'},
-                            {'label': 'Sin Depresión', 'value': 0},
-                            {'label': 'Con Depresión', 'value': 1}
-                        ],
-                        value='all',
-                        inline=True
-                    )
-                ], style={'flex': 1, 'padding': 10}),
-            ], style={'display': 'flex', 'marginBottom': 20}),
+            html.Div(className='filter-item', children=[
+                html.Label("Presión Académica:"),
+                dcc.RangeSlider(
+                    id='pressure-slider',
+                    min=df['Academic Pressure'].min(),
+                    max=df['Academic Pressure'].max(),
+                    value=[df['Academic Pressure'].min(), df['Academic Pressure'].max()],
+                    marks={int(p): str(int(p)) for p in range(int(df['Academic Pressure'].min()), int(df['Academic Pressure'].max())+1)},
+                    step=0.5
+                )
+            ]),
             
-            html.Hr(),
-        ], style={'backgroundColor': 'white', 'padding': 20, 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)', 'margin': '0 20px 20px 20px'}),
+            html.Div(className='filter-item', children=[
+                html.Label("CGPA:"),
+                dcc.RangeSlider(
+                    id='cgpa-slider',
+                    min=df['CGPA'].min(),
+                    max=df['CGPA'].max(),
+                    value=[df['CGPA'].min(), df['CGPA'].max()],
+                    marks={round(cgpa, 1): str(round(cgpa, 1)) for cgpa in np.linspace(df['CGPA'].min(), df['CGPA'].max(), 5)},
+                    step=0.1
+                )
+            ]),
+        ]),
+        
+        # Fila 3: Checkboxes de sueño y radio buttons de depresión
+        html.Div(className='filter-row', children=[
+            html.Div(className='filter-item', children=[
+                html.Label("Duración del Sueño:"),
+                dcc.Checklist(
+                    id='sleep-checklist',
+                    options=sleep_options,
+                    value=df['Sleep Duration'].unique().tolist(),
+                    inline=True
+                )
+            ]),
+            
+            html.Div(className='filter-item', children=[
+                html.Label("Estado de Depresión:"),
+                dcc.RadioItems(
+                    id='depression-radio',
+                    options=[
+                        {'label': 'Todos', 'value': 'all'},
+                        {'label': 'Sin Depresión', 'value': 0},
+                        {'label': 'Con Depresión', 'value': 1}
+                    ],
+                    value='all',
+                    inline=True
+                )
+            ]),
+        ]),
+        
+        html.Hr(),
     ]),
 
     # KPIs
-    html.Div([
-        html.Div([
-            html.Div([
+    html.Div(className='kpis-section', children=[
+        html.Div(className='kpis-container', children=[
+            html.Div(className='kpi-card kpi-total', children=[
                 html.H4("👥 Total Estudiantes"),
-                html.H2(id='kpi-total', style={'color': '#3498db'})
-            ], className='kpi-card', style={'flex': 1, 'padding': 20, 'background': '#f8f9fa', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
+                html.H2(id='kpi-total')
+            ]),
             
-            html.Div([
+            html.Div(className='kpi-card kpi-depression', children=[
                 html.H4("😔 Tasa de Depresión"),
-                html.H2(id='kpi-depression', style={'color': '#e74c3c'})
-            ], className='kpi-card', style={'flex': 1, 'padding': 20, 'background': '#f8f9fa', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
+                html.H2(id='kpi-depression')
+            ]),
             
-            html.Div([
+            html.Div(className='kpi-card kpi-age', children=[
                 html.H4("🎂 Edad Promedio"),
-                html.H2(id='kpi-age', style={'color': '#2ecc71'})
-            ], className='kpi-card', style={'flex': 1, 'padding': 20, 'background': '#f8f9fa', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
+                html.H2(id='kpi-age')
+            ]),
             
-            html.Div([
+            html.Div(className='kpi-card kpi-cgpa', children=[
                 html.H4("📚 CGPA Promedio"),
-                html.H2(id='kpi-cgpa', style={'color': '#f39c12'})
-            ], className='kpi-card', style={'flex': 1, 'padding': 20, 'background': '#f8f9fa', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
-        ], style={'display': 'flex', 'gap': 20, 'marginBottom': 20, 'padding': '0 20px'}),
+                html.H2(id='kpi-cgpa')
+            ]),
+        ]),
     ]),
 
     # Gráficos
-    html.Div([
+    html.Div(className='charts-section', children=[
         # Fila 1
-        html.Div([
-            html.Div([
+        html.Div(className='chart-row', children=[
+            html.Div(className='chart-card', children=[
                 dcc.Graph(id='depression-pie')
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
+            ]),
             
-            html.Div([
+            html.Div(className='chart-card', children=[
                 dcc.Graph(id='gender-bar')
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
-        ], style={'display': 'flex', 'gap': 20, 'marginBottom': 20, 'padding': '0 20px'}),
+            ]),
+        ]),
         
         # Fila 2
-        html.Div([
-            html.Div([
+        html.Div(className='chart-row', children=[
+            html.Div(className='chart-card', children=[
                 dcc.Graph(id='sleep-bar')
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
+            ]),
             
-            html.Div([
-                dcc.Graph(id='pressure-cgpa-scatter')
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
-        ], style={'display': 'flex', 'gap': 20, 'marginBottom': 20, 'padding': '0 20px'}),
-        
-        # Fila 3
-        html.Div([
-            html.Div([
+            html.Div(className='chart-card', children=[
                 dcc.Graph(id='degree-bar')
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
-        ], style={'display': 'flex', 'gap': 20, 'marginBottom': 20, 'padding': '0 20px'}),
+            ]),
+        ]),
         
-        # Fila 4: Datos filtrados
-        html.Div([
-            html.Div([
-                html.H3("📋 Datos Filtrados", style={'color': '#2c3e50'}),
+        # Fila 3: Datos filtrados
+        html.Div(className='chart-row', children=[
+            html.Div(className='table-card', children=[
+                html.H3("📋 Datos Filtrados"),
                 dash_table.DataTable(
                     id='filtered-table',
                     page_size=10,
                     style_table={'overflowX': 'auto'},
-                    style_header={'backgroundColor': '#3498db', 'color': 'white', 'fontWeight': 'bold'},
+                    style_header={'backgroundColor': COLORS['table_header'], 'color': 'white', 'fontWeight': 'bold'},
                     style_cell={'textAlign': 'left', 'padding': '8px'}
                 )
-            ], style={'flex': 1, 'padding': 20, 'background': 'white', 'borderRadius': 10, 'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'}),
-        ], style={'display': 'flex', 'gap': 20, 'marginBottom': 20, 'padding': '0 20px'}),
+            ]),
+        ]),
     ])
 ])
 
@@ -290,7 +288,7 @@ def update_depression_pie(genders, cities, degrees, age_range, pressure_range, c
         labels=[depression_labels.get(x, str(x)) for x in depression_counts.index],
         values=depression_counts.values,
         hole=0.4,
-        marker_colors=['#2ecc71', '#e74c3c'],
+        marker_colors=[COLORS['no_depression'], COLORS['yes_depression']],
         textinfo='percent+label',
         textfont_size=14
     )])
@@ -329,14 +327,14 @@ def update_gender_bar(genders, cities, degrees, age_range, pressure_range, cgpa_
             name='Sin Depresión',
             x=gender_depression_pct.index,
             y=gender_depression_pct[0],
-            marker_color='#2ecc71'
+            marker_color=COLORS['no_depression']
         ))
     if 1 in gender_depression_pct.columns:
         fig.add_trace(go.Bar(
             name='Con Depresión',
             x=gender_depression_pct.index,
             y=gender_depression_pct[1],
-            marker_color='#e74c3c'
+            marker_color=COLORS['yes_depression']
         ))
     
     fig.update_layout(
@@ -377,14 +375,14 @@ def update_sleep_bar(genders, cities, degrees, age_range, pressure_range, cgpa_r
             name='Sin Depresión',
             x=sleep_depression_pct.index,
             y=sleep_depression_pct[0],
-            marker_color='#2ecc71'
+            marker_color=COLORS['no_depression']
         ))
     if 1 in sleep_depression_pct.columns:
         fig.add_trace(go.Bar(
             name='Con Depresión',
             x=sleep_depression_pct.index,
             y=sleep_depression_pct[1],
-            marker_color='#e74c3c'
+            marker_color=COLORS['yes_depression']
         ))
     
     fig.update_layout(
@@ -396,38 +394,7 @@ def update_sleep_bar(genders, cities, degrees, age_range, pressure_range, cgpa_r
     
     return fig
 
-# Callback para gráfico de presión académica vs CGPA
-@callback(
-    Output('pressure-cgpa-scatter', 'figure'),
-    [Input('gender-filter', 'value'),
-     Input('city-filter', 'value'),
-     Input('degree-filter', 'value'),
-     Input('age-slider', 'value'),
-     Input('pressure-slider', 'value'),
-     Input('cgpa-slider', 'value'),
-     Input('sleep-checklist', 'value'),
-     Input('depression-radio', 'value')]
-)
-def update_pressure_cgpa_scatter(genders, cities, degrees, age_range, pressure_range, cgpa_range, sleep_values, depression_status):
-    filtered_df = filter_data(genders, cities, degrees, age_range, pressure_range, cgpa_range, sleep_values, depression_status)
-    
-    fig = px.scatter(
-        filtered_df,
-        x='Academic Pressure',
-        y='CGPA',
-        color='Depression',
-        color_continuous_scale=['#2ecc71', '#e74c3c'],
-        title="Presión Académica vs CGPA",
-        labels={'Depression': 'Depresión (0=No, 1=Sí)'},
-        hover_data=['Age', 'Gender', 'City', 'Degree']
-    )
-    
-    fig.update_layout(
-        xaxis_title="Presión Académica",
-        yaxis_title="CGPA"
-    )
-    
-    return fig
+
 
 # Callback para gráfico de carrera
 @callback(
@@ -458,7 +425,7 @@ def update_degree_bar(genders, cities, degrees, age_range, pressure_range, cgpa_
             y=degree_depression_pct.index,
             x=degree_depression_pct[0],
             orientation='h',
-            marker_color='#2ecc71'
+            marker_color=COLORS['no_depression']
         ))
     if 1 in degree_depression_pct.columns:
         fig.add_trace(go.Bar(
@@ -466,7 +433,7 @@ def update_degree_bar(genders, cities, degrees, age_range, pressure_range, cgpa_
             y=degree_depression_pct.index,
             x=degree_depression_pct[1],
             orientation='h',
-            marker_color='#e74c3c'
+            marker_color=COLORS['yes_depression']
         ))
     
     fig.update_layout(
