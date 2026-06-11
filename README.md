@@ -5,6 +5,10 @@ Este repositorio contiene el desarrollo completo de un sistema de análisis pred
 ```bash
 Project-data-science-3/
 │
+├── app/                   # Aplicación principal (dashboard y scripts)
+│   ├── dashboard.py       # Dashboard interactivo con Dash y Plotly
+│   └── generate_profiling_report.py  # Generador de reportes de profiling
+│
 ├── assets/                # Archivos estáticos para el dashboard (CSS)
 │   └── styles.css         # Estilos del dashboard
 │
@@ -43,8 +47,6 @@ Project-data-science-3/
 │   ├── carga_csv.py        # Carga de datos
 │   └── eda_utils.py        # Utilidades para análisis exploratorio
 │
-├── dashboard.py            # Dashboard interactivo con Dash y Plotly
-├── generate_profiling_report.py  # Generador de reportes de perfilado
 ├── environment.yml         # Dependencias del proyecto
 └── README.md
 ```
@@ -70,7 +72,7 @@ Project-data-science-3/
 6. **Modelos entrenados** → `outputs/models/`
 7. **Visualizaciones de evaluación** → `outputs/plots/`
 8. **Reportes finales** → `outputs/reports/`
-9. **Dashboard interactivo** → `dashboard.py`
+9. **Dashboard interactivo** → `app/dashboard.py`
 
 ## Cómo usar el proyecto
 
@@ -88,11 +90,16 @@ conda activate <nombre-del-entorno>
 
 ### 3. Ejecutar el dashboard:
 ```bash
-python dashboard.py
+python app/dashboard.py
 ```
 El dashboard estará disponible en `http://127.0.0.1:8050/`
 
-### 4. Ejecutar notebooks:
+### 4. Generar reporte de profiling:
+```bash
+python app/generate_profiling_report.py
+```
+
+### 5. Ejecutar notebooks:
 Si quieres explorar o reejecutar los notebooks:
 ```bash
 jupyter notebook

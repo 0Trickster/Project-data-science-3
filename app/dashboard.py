@@ -4,8 +4,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
-app = dash.Dash(__name__, title="Dashboard Depresión Estudiantil - Interactivo")
+# Obtener la ruta del directorio del script actual
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+app = dash.Dash(__name__, title="Dashboard Depresión Estudiantil - Interactivo", assets_folder=str(BASE_DIR / 'assets'))
 server = app.server
 
 # Paleta de colores para gráficos
@@ -17,7 +21,7 @@ COLORS = {
 }
 
 # Cargar datos
-df = pd.read_csv('data/processed/Student_Depression_Dataset_Limpio.csv')
+df = pd.read_csv(BASE_DIR / 'data' / 'processed' / 'Student_Depression_Dataset_Limpio.csv')
 
 # Preparar opciones para filtros
 gender_options = [{'label': g, 'value': g} for g in df['Gender'].unique()]
