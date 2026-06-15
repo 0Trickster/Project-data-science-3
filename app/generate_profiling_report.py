@@ -1,5 +1,5 @@
 import pandas as pd
-from data_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 from pathlib import Path
 
 # Obtener la ruta del directorio del script actual
